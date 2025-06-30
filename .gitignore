@@ -1,0 +1,11 @@
+# Ignore build artifacts
+target
+.rs.bk
+
+# IDE and OS junk
+.DS_Store
+.log
+
+# VSCode or Cursor
+.vscode
+.idea
