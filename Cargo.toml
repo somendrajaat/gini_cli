@@ -6,7 +6,7 @@ authors = ["Somendra Jaat Somendra830@gmail.com"]
 description = "A lightweight CLI tool for saving and restoring project checkpoints. Think of it as mini git snapshots."
 license = "MIT"
 repository = "https://github.com/somendrajaat/gini_cli"
-keywords = ["cli", "checkpoint ", "versioning", "undo", "restore"]
+keywords = ["cli", "backup", "snapshot", "git", "project-management"]
 categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]

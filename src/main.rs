@@ -14,6 +14,10 @@ use std::process::Command as ShellCommand;
 
 const CHECKPOINT_DIR: &str = ".undoit/checkpoints";
 
+/// The main entry point of the `gini` CLI application.
+///
+/// It parses command-line arguments and executes the corresponding subcommand:
+/// `init`, `checkpoint`, `restore`, or `list`.
 fn main() {
     let matches = Command::new("gini")
         .version("0.1.3")
@@ -61,6 +65,9 @@ fn main() {
     }
 }
 
+/// Initializes the project by creating the `.undoit/checkpoints` directory.
+///
+/// If the directory already exists, it prints a message and does nothing.
 fn init_project() {
     let path = Path::new(CHECKPOINT_DIR);
     if path.exists() {
@@ -74,6 +81,9 @@ fn init_project() {
     }
 }
 
+/// Ensures that the `.undoit/checkpoints` directory exists.
+///
+/// If the directory is not found, it prints an error message and exits the process.
 fn ensure_initialized() {
     if !Path::new(CHECKPOINT_DIR).exists() {
         eprintln!("--- No .undoit project found in this directory.\n--- Run `gini init` first.");
@@ -81,6 +91,16 @@ fn ensure_initialized() {
     }
 }
 
+/// Creates a new checkpoint.
+///
+/// This involves:
+/// 1. Creating a timestamped folder for the checkpoint.
+/// 2. Copying all project files (except `.undoit` and `.git`) into it.
+/// 3. If in a git repository, stashing the current changes with a checkpoint message.
+///
+/// # Arguments
+///
+/// * `name` - The name for the new checkpoint.
 fn create_checkpoint(name: &str) {
     let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S").to_string();
     let folder_name = format!("{}_{}", timestamp, name);
@@ -122,6 +142,14 @@ fn create_checkpoint(name: &str) {
     );
 }
 
+/// Restores the project state from a specified checkpoint.
+///
+/// It finds the checkpoint by name, then copies all its contents back to the
+/// project's root directory. If a git stash was created, it attempts to pop it.
+///
+/// # Arguments
+///
+/// * `name` - The name of the checkpoint to restore.
 fn restore_checkpoint(name: &str) {
     let checkpoint = find_checkpoint_by_name(name);
     match checkpoint {
@@ -158,6 +186,9 @@ fn restore_checkpoint(name: &str) {
     }
 }
 
+/// Lists all available checkpoints in the `.undoit/checkpoints` directory.
+///
+/// It prints each checkpoint's folder name to the console.
 fn list_checkpoints() {
     let path = Path::new(CHECKPOINT_DIR);
     if let Ok(entries) = fs::read_dir(path) {
@@ -175,6 +206,18 @@ fn list_checkpoints() {
     }
 }
 
+/// Finds the full path of a checkpoint by its name.
+///
+/// It searches for a directory in the checkpoint folder that either matches the name
+/// exactly or ends with `_{name}`.
+///
+/// # Arguments
+///
+/// * `name` - The name of the checkpoint to find.
+///
+/// # Returns
+///
+/// An `Option<PathBuf>` which is `Some(path)` if found, or `None` otherwise.
 fn find_checkpoint_by_name(name: &str) -> Option<PathBuf> {
     let path = Path::new(CHECKPOINT_DIR);
     if let Ok(entries) = fs::read_dir(path) {
