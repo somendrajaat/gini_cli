@@ -3,7 +3,7 @@
 // Version: 0.1.3
 //
 // This tool lets you create, list, and restore checkpoints in your project directory.
-// Each checkpoint is a folder under .undoit/checkpoints with a timestamp and name.
+// Each checkpoint is a folder under .gini/checkpoints with a timestamp and name.
 // Optionally, it can stash your git state when creating a checkpoint.
 
 use clap::{Arg, ArgAction, Command};
@@ -12,7 +12,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command as ShellCommand;
 
-const CHECKPOINT_DIR: &str = ".undoit/checkpoints";
+const CHECKPOINT_DIR: &str = ".gini/checkpoints";
 
 /// The main entry point of the `gini` CLI application.
 ///
@@ -31,7 +31,8 @@ fn main() {
                 .long("checkpoint")
                 .value_name("NAME")
                 .help("Create a checkpoint")
-                .conflicts_with_all(["restore", "list"]),
+                .conflicts_with_all(["restore", "list"])
+                .num_args(1..),
         )
         .arg(
             Arg::new("restore")
@@ -39,7 +40,8 @@ fn main() {
                 .long("restore")
                 .value_name("NAME")
                 .help("Restore a checkpoint")
-                .conflicts_with_all(["checkpoint", "list"]),
+                .conflicts_with_all(["checkpoint", "list"])
+                .num_args(1..),
         )
         .arg(
             Arg::new("list")
@@ -53,40 +55,42 @@ fn main() {
 
     if let Some(("init", _)) = matches.subcommand() {
         init_project();
-    } else if let Some(name) = matches.get_one::<String>("checkpoint") {
+    } else if let Some(values) = matches.get_many::<String>("checkpoint") {
+        let name = values.map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
         ensure_initialized();
-        create_checkpoint(name);
-    } else if let Some(name) = matches.get_one::<String>("restore") {
+        create_checkpoint(&name);
+    } else if let Some(values) = matches.get_many::<String>("restore") {
+        let name = values.map(|s| s.as_str()).collect::<Vec<_>>().join(" ");
         ensure_initialized();
-        restore_checkpoint(name);
+        restore_checkpoint(&name);
     } else if matches.get_flag("list") {
         ensure_initialized();
         list_checkpoints();
     }
 }
 
-/// Initializes the project by creating the `.undoit/checkpoints` directory.
+/// Initializes the project by creating the `.gini/checkpoints` directory.
 ///
 /// If the directory already exists, it prints a message and does nothing.
 fn init_project() {
     let path = Path::new(CHECKPOINT_DIR);
     if path.exists() {
-        println!("--- .undoit already exists.");
+        println!("--- .gini already exists.");
     } else {
-        fs::create_dir_all(path).expect("Failed to create .undoit folder");
+        fs::create_dir_all(path).expect("Failed to create .gini folder");
         println!(
-            "--- Initialized empty .undoit project in {}",
+            "--- Initialized empty .gini project in {}",
             std::env::current_dir().unwrap().display()
         );
     }
 }
 
-/// Ensures that the `.undoit/checkpoints` directory exists.
+/// Ensures that the `.gini/checkpoints` directory exists.
 ///
 /// If the directory is not found, it prints an error message and exits the process.
 fn ensure_initialized() {
     if !Path::new(CHECKPOINT_DIR).exists() {
-        eprintln!("--- No .undoit project found in this directory.\n--- Run `gini init` first.");
+        eprintln!("--- No .gini project found in this directory.\n--- Run `gini init` first.");
         std::process::exit(1);
     }
 }
@@ -95,15 +99,16 @@ fn ensure_initialized() {
 ///
 /// This involves:
 /// 1. Creating a timestamped folder for the checkpoint.
-/// 2. Copying all project files (except `.undoit` and `.git`) into it.
+/// 2. Copying all project files (except `.gini` and `.git`) into it.
 /// 3. If in a git repository, stashing the current changes with a checkpoint message.
 ///
 /// # Arguments
 ///
 /// * `name` - The name for the new checkpoint.
 fn create_checkpoint(name: &str) {
+    let sanitized_name = name.replace(|c: char| !c.is_alphanumeric() && c != '_', "_");
     let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S").to_string();
-    let folder_name = format!("{}_{}", timestamp, name);
+    let folder_name = format!("{}_{}", timestamp, sanitized_name);
     let checkpoint_path = Path::new(CHECKPOINT_DIR).join(&folder_name);
     fs::create_dir_all(&checkpoint_path).expect("Failed to create checkpoint folder");
 
@@ -115,7 +120,7 @@ fn create_checkpoint(name: &str) {
     for entry in fs::read_dir(".").unwrap().flatten() {
         let path = entry.path();
         if let Some(file_name) = path.file_name().and_then(|n| n.to_str()) {
-            if file_name != ".undoit" && file_name != ".git" {
+            if file_name != ".gini" && file_name != ".git" {
                 paths_to_copy.push(path);
             }
         }
@@ -186,7 +191,7 @@ fn restore_checkpoint(name: &str) {
     }
 }
 
-/// Lists all available checkpoints in the `.undoit/checkpoints` directory.
+/// Lists all available checkpoints in the `.gini/checkpoints` directory.
 ///
 /// It prints each checkpoint's folder name to the console.
 fn list_checkpoints() {
@@ -219,11 +224,25 @@ fn list_checkpoints() {
 ///
 /// An `Option<PathBuf>` which is `Some(path)` if found, or `None` otherwise.
 fn find_checkpoint_by_name(name: &str) -> Option<PathBuf> {
+    let sanitized_name = name.replace(|c: char| !c.is_alphanumeric() && c != '_', "_");
     let path = Path::new(CHECKPOINT_DIR);
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
             if let Some(fname_str) = entry.path().file_name().and_then(|f| f.to_str()) {
-                if fname_str == name || fname_str.ends_with(&format!("_{}", name)) {
+                // Exact match (for full checkpoint name)
+                if fname_str == name {
+                    return Some(entry.path());
+                }
+                // Match against sanitized name
+                if fname_str == sanitized_name {
+                    return Some(entry.path());
+                }
+                // Suffix match for partial name
+                if fname_str.ends_with(&format!("_{}", name)) {
+                    return Some(entry.path());
+                }
+                // Suffix match for sanitized partial name
+                if fname_str.ends_with(&format!("_{}", sanitized_name)) {
                     return Some(entry.path());
                 }
             }
