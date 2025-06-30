@@ -1,6 +1,6 @@
 [package]
 name = "gini"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Somendra Jaat Somendra830@gmail.com"]
 description = "A lightweight CLI tool for saving and restoring project checkpoints. Think of it as mini git snapshots."

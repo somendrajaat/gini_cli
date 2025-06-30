@@ -1,6 +1,6 @@
 // gini: A simple CLI checkpoint system for your projects.
 // Author: Somendra somendra830@gmail.com
-// Version: 0.1.3
+// Version: 0.1.4
 //
 // This tool lets you create, list, and restore checkpoints in your project directory.
 // Each checkpoint is a folder under .gini/checkpoints with a timestamp and name.
@@ -20,7 +20,7 @@ const CHECKPOINT_DIR: &str = ".gini/checkpoints";
 /// `init`, `checkpoint`, `restore`, or `list`.
 fn main() {
     let matches = Command::new("gini")
-        .version("0.1.3")
+        .version("0.1.4")
         .author("Somendra somendra830@gmail.com")
         .about("A simple CLI checkpoint system")
         .arg_required_else_help(true)
