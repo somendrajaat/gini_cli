@@ -41,7 +41,7 @@ fn main() {
                 .long("restore")
                 .help("Restore a checkpoint")
                 .conflicts_with_all(["checkpoint", "list"])
-                .num_args(0..),
+                .action(ArgAction::SetTrue),
         )
         .arg(
             Arg::new("list")
@@ -57,7 +57,7 @@ fn main() {
                 .long("delete")
                 .help("Delete a checkpoint")
                 .conflicts_with_all(["checkpoint", "restore", "list"])
-                .num_args(0..),
+                .action(ArgAction::SetTrue),
         )
         .get_matches();
 
