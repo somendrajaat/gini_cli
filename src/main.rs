@@ -21,7 +21,7 @@ const CHECKPOINT_DIR: &str = ".gini/checkpoints";
 /// `init`, `checkpoint`, `restore`, or `list`.
 fn main() {
     let matches = Command::new("gini")
-        .version("0.1.5")
+        .version("0.1.6")
         .author("Somendra somendra830@gmail.com")
         .about("A simple CLI checkpoint system")
         .arg_required_else_help(true)
