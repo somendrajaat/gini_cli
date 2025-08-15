@@ -1,7 +1,6 @@
 
 # gini checkpoint system
 
-![Genie Aladdin GIF](https://media.tenor.com/qA34cTZNuIAAAAAd/genie-aladdin.gif)
 
 A simple, fast, and secure command-line checkpoint system for your projects. **gini** lets you create, list, and restore checkpoints with the efficiency of Git's snapshot model, making it easy to save and roll back to different states without duplicating data.
 
@@ -120,3 +119,4 @@ This model is incredibly efficient, ensuring that you only store what has change
 
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. 
+
