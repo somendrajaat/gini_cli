@@ -1,15 +1,5 @@
 /*
-=========================================================================
-File: Cargo.toml (Root of your project)
-Description: This is the only Cargo.toml you need.
--------------------------------------------------------------------------
-Key changes:
-- All dependencies are now in this single file.
-- The `gini_lib` dependency has been removed as the code is merged.
-=========================================================================
-*/
 
-/*
 [package]
 name = "gini"
 version = "0.2.0"
@@ -28,15 +18,7 @@ chrono = "0.4"
 */
 
 
-/*
-=========================================================================
-File: src/main.rs
-Description: Your complete, single-file application.
--------------------------------------------------------------------------
-All code from the `gini_lib` has been moved into this file.
-This resolves all compilation errors related to unresolved imports and modules.
-=========================================================================
-*/
+
 
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand};
@@ -56,7 +38,7 @@ const HASH_LENGTH: usize = 40;
 
 // --- CLI Definition ---
 
-/// A simple, efficient CLI checkpoint system for your projects.
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -88,7 +70,7 @@ enum Commands {
 // --- Main Application Logic ---
 
 fn main() -> Result<()> {
-    // Set up proper error handling
+  
     if let Err(e) = run() {
         eprintln!("gini: error: {}", e);
         std::process::exit(1);
