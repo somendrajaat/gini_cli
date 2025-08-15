@@ -1,20 +1,33 @@
-# gini
 
-A simple command-line checkpoint system for your projects. `gini` lets you create, list, and restore checkpoints in your project directory, making it easy to save and roll back to different states. It's like having a mini, local version control system for quick snapshots.
+# gini checkpoint system
+
+A simple, fast, and secure command-line checkpoint system for your projects. **gini** lets you create, list, and restore checkpoints with the efficiency of Git's snapshot model, making it easy to save and roll back to different states without duplicating data.
+
+It's a lightweight but powerful tool for managing project states with confidence. 🚀
+
+---
 
 ## Features
 
-- **Initialize**: Set up `gini` in your project with a single command.
-- **Create**: Make a named checkpoint of your current project state (using regular file copies).
-- **Restore**: Roll back all your project files to a previously saved checkpoint.
-- **List**: View all the checkpoints you've created.
-- **Backup**: Restore from automatic backups created before each restore operation.
-- **Safety**: Automatic backups and confirmation prompts prevent accidental data loss.
+* **⚡ Efficient Snapshots**: Instead of making full copies, `gini` uses a content-addressed storage model inspired by Git. It only stores unique file contents (blobs), saving significant disk space.
+
+* **🌱 Initialize**: Set up `gini` in your project with a single command.
+
+* **📸 Create Checkpoints**: Instantly save a snapshot of your project's state with a descriptive message.
+
+* **⏪ Restore Checkpoints**: Safely roll back your entire project to any previous checkpoint.
+
+* **📜 View History**: See a clean, chronological log of all your checkpoints.
+
+* **🛡️ Automatic Backups**: Before any destructive operation like a restore, `gini` automatically creates a backup, giving you a complete safety net.
+
+* **🔒 Enhanced Security**: Protects against common issues with input validation, path traversal protection, and file size limits.
+
+---
 
 ## Installation
 
 You can install `gini` directly from crates.io using Cargo:
-
 ```bash
 cargo install gini
 ```
@@ -91,13 +104,16 @@ gini b
 ```
 This will show you all available backups with their creation timestamps and allow you to restore from any of them.
 
-## Notes and Limitations
+## How It Works
+- gini is built on the same principles as Git. Instead of copying your entire project for each checkpoint, it uses a content-addressed object store.
 
-- **Full Copies:** Each checkpoint is a full copy of your project files. Changes in your working directory after creating a checkpoint do not affect previous checkpoints, and vice versa.
-- **Exclusions:** By default, `.gini`, `.git`, and `target` directories are excluded from checkpoints.
-- **Symlinks:** Symlinks are not handled specially and may be copied as regular files or skipped.
-- **Overwrite Warning:** Restoring a checkpoint will overwrite files in your project directory. Make sure to commit or back up important changes before restoring.
+- **Blobs**: The content of each file is hashed and stored as a "blob." If a file doesn't change, its blob is reused across multiple checkpoints.
 
+- **Trees**: The directory structure is stored in "tree" objects, which point to blobs (files) and other trees (subdirectories).
+
+- **Commits**: A "commit" (or checkpoint) is a snapshot that points to a single top-level tree, along with metadata like the author and your commit message.
+
+This model is incredibly efficient, ensuring that you only store what has changed, which saves both time and disk space.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. 
