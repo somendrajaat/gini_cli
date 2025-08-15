@@ -8,7 +8,8 @@ A simple command-line checkpoint system for your projects. `gini` lets you creat
 - **Create**: Make a named checkpoint of your current project state (using regular file copies).
 - **Restore**: Roll back all your project files to a previously saved checkpoint.
 - **List**: View all the checkpoints you've created.
-- **Delete**: Remove checkpoints you no longer need.
+- **Backup**: Restore from automatic backups created before each restore operation.
+- **Safety**: Automatic backups and confirmation prompts prevent accidental data loss.
 
 ## Installation
 
@@ -41,27 +42,27 @@ This command creates a `.gini/checkpoints` directory where all your checkpoints 
 
 ### 2. Create a Checkpoint
 
-To save a snapshot of your project, create a checkpoint with a descriptive name.
+To save a snapshot of your project, create a checkpoint with a descriptive message.
 
 ```bash
-gini --checkpoint "my-first-checkpoint"
+gini checkpoint -m "my-first-checkpoint"
 ```
-You can also use the shorter `-c` flag:
+You can also use the shorter command:
 ```bash
-gini -c "refactoring-done"
+gini c -m "refactoring-done"
 ```
-This saves the current state of your files (excluding `.gini`, `.git`, and `target`) into a new checkpoint. Each checkpoint is a full, independent copy of your project at that moment. Files are copied, not hard-linked, so changes in your working directory do not affect previous checkpoints.
+This saves the current state of your files (excluding `.gini`, `.git`, and `target`) into a new checkpoint. Each checkpoint is a full, independent copy of your project at that moment.
 
 ### 3. List Available Checkpoints
 
 To see a list of all the checkpoints you've saved:
 
 ```bash
-gini --list
+gini log
 ```
-Or with the `-l` flag:
+Or use the shorter command:
 ```bash
-gini -l
+gini l
 ```
 
 ### 4. Restore a Checkpoint
@@ -69,25 +70,26 @@ gini -l
 If you need to revert your project to a previous state, use the restore command. You will be prompted to select a checkpoint interactively:
 
 ```bash
-gini --restore
+gini restore
 ```
-Or with the `-r` flag:
+Or use the shorter command:
 ```bash
-gini -r
+gini r
 ```
 This will replace your current files with the files from the selected checkpoint. **Warning:** This will overwrite existing files in your project directory.
 
-### 5. Delete a Checkpoint
+### 5. Restore from a Backup
 
-To delete a checkpoint interactively:
+If you need to restore from a backup (created automatically before each restore operation), use the backup command:
 
 ```bash
-gini --delete
+gini backup
 ```
-Or with the `-d` flag:
+Or use the shorter command:
 ```bash
-gini -d
+gini b
 ```
+This will show you all available backups with their creation timestamps and allow you to restore from any of them.
 
 ## Notes and Limitations
 
